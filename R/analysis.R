@@ -7,7 +7,8 @@ lapply(packages, library, character.only = TRUE)
 
 data <- read_csv("./data/Inequality in Income.csv")
 glimpse(data) # take a quick look at the data
-# make names better, i.e. all lower case separated by underscore, no brackets
+
+# Make names better, i.e. all lower case separated by underscore, no brackets
 fix_names <- function(x){
   x %>% tolower() %>%
     gsub(" ","_", .) %>% 
@@ -15,14 +16,22 @@ fix_names <- function(x){
     gsub("\\)","", .)
 }
 data <- tibble(data, .name_repair = fix_names) # apply function
-unique(data$human_development_groups) # look at distinct levels 
-unique(data$undp_developing_regions) # look at distinct levels 
+
+# Take a look at the variables and their levels
+unique(data$human_development_groups) 
+unique(data$undp_developing_regions) 
 filter(data, is.na(human_development_groups)) # investigate the NAs 
 filter(data, is.na(hdi_rank_2021)) # investigate the NAs
 filter(data, is.na(undp_developing_regions)) # investigate the NAs
+
 # confirm that Human Development Group is allocated based on HDI rank. Yes:
-data %>% select(hdi_rank_2021, human_development_groups) %>% arrange(hdi_rank_2021) %>% print(n = nrow(data))
+data %>% 
+  select(hdi_rank_2021, human_development_groups) %>% 
+  arrange(hdi_rank_2021) %>% 
+  print(n = nrow(data))
+
 # 1. Data management
+
 ## Create a developing nations membership flag
 data <- data %>%
   mutate(
@@ -52,6 +61,7 @@ data_long <- data %>%
 # 2. Descriptives and visuals
 
 ## Descriptives
+
 # Global inequality over time
 inequality_time <- data_long %>%
   group_by(year) %>%
@@ -70,7 +80,8 @@ ggplot(inequality_time, aes(year, mean_inequality)) +
 
 ggsave(filename = "./outputs/global_inequality.png")
 
-# UNDP dev flag
+# Create a flag to indicate whether a country is developing or not
+# then calculate mean inequality in each group
 undp_inequality <- data_long %>%
   group_by(dev_region_flag, year) %>%
   summarise(
@@ -102,7 +113,6 @@ undp_2021 <- data_long %>%
     undp_developing_regions = factor(undp_developing_regions, levels = unique(undp_developing_regions))
   ) %>%
   drop_na()
-
 
 ggplot(undp_2021, aes(country, inequality_in_income, fill = undp_developing_regions)) +
   geom_col(colour = "black") +
@@ -162,7 +172,8 @@ ggsave(filename = "./outputs/dev_region_HDG_composition.png")
 ### End 2 ###
 
 # 3. Models
-## First set of models explores inequalit over time and differences between 
+
+## First set of models explores inequality over time and differences between 
 ## developing and non-developing
 
 mod_1 <- lmerTest::lmer(inequality_in_income ~ year + (1|country), data_long)
@@ -174,15 +185,14 @@ summary(mod_2)
 mod_3 <-  update(mod_2, ~.+ year:dev_region_flag)
 summary(mod_3)
 
-anova(mod_1, mod_2, mod_3) # best fit is mod_2
+anova(mod_1, mod_2, mod_3) # best fit is mod_2 - interaction not important
 
-## Second set of models explores how development status relates to inqequality
+## Second set of models explores how development status relates to inequality
 mod_1 <- lmerTest::lmer(inequality_in_income ~ year*human_development_groups + (1|country), data_long)
 summary(mod_1)
 
 # get marginal means and plot them
 ems <- ggemmeans(mod_1, terms = c("year","human_development_groups"))
-
 
 ggplot(ems, aes(x, predicted, colour = group)) +
   geom_point() +
