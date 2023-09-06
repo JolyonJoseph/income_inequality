@@ -4,6 +4,7 @@ A brief exploration of inequality data from [Human Development Reports](https://
 
 # Requirements
 Created in RStudio 2023.06.0 with R version 4.3.0. 
+
 Uses the following packages:
 - tidyr
 - dplyr
