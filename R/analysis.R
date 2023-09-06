@@ -1,6 +1,6 @@
 rm(list = ls()) # clear the workspace
 # Packages
-packages <- c('tidyverse','lme4','lmerTest')
+packages <- c('tidyr','dplyr','readr','forcats','ggplot2','ggeffects','lme4','lmerTest')
 pkg_notinstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 lapply(pkg_notinstall, install.packages, dependencies = TRUE)
 lapply(packages, library, character.only = TRUE)
