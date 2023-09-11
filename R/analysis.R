@@ -206,3 +206,56 @@ ggplot2::ggplot(ems, aes(x, predicted, colour = group)) +
 ggplot2::ggsave(filename = "./outputs/model_ems_hdg_time.png")
 
 ### End 3. ###
+
+# 4. Supplementary
+## Model just LAC human development status relates to inequality
+LAC <- data_long %>% filter(undp_developing_regions == "LAC")
+mod_1 <- lmerTest::lmer(inequality_in_income ~ year*human_development_groups + (1|country), LAC)
+summary(mod_1)
+
+mod_1 <- lmerTest::lmer(inequality_in_income ~ year +human_development_groups + (1|country), LAC)
+summary(mod_1)
+
+# get marginal means and plot them
+ems <- ggeffects::ggemmeans(mod_1, terms = c("year","human_development_groups"))
+
+ggplot2::ggplot(ems, aes(x, predicted, colour = group)) +
+  geom_point() +
+  geom_line(aes(group = group)) +
+  # geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1) + 
+  theme_bw() +
+  ylab("Predicted Gini coefficient") + xlab("Year") +
+  ggtitle("Estimated marginal means of the effect of time on inequality in each Human Development Group - LAC") +
+  scale_colour_discrete(name = "Human Development Group") 
+
+SSA <- data_long %>% filter(undp_developing_regions == "SSA")
+mod_1 <- lmerTest::lmer(inequality_in_income ~ year*human_development_groups + (1|country), SSA)
+summary(mod_1)
+
+# get marginal means and plot them
+ems <- ggeffects::ggemmeans(mod_1, terms = c("year","human_development_groups"))
+
+ggplot2::ggplot(ems, aes(x, predicted, colour = group)) +
+  geom_point() +
+  geom_line(aes(group = group)) +
+  # geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1) + 
+  theme_bw() +
+  ylab("Predicted Gini coefficient") + xlab("Year") +
+  ggtitle("Estimated marginal means of the effect of time on inequality in each Human Development Group - SSA") +
+  scale_colour_discrete(name = "Human Development Group") 
+
+mod_1 <- lmerTest::lmer(inequality_in_income ~ year + human_development_groups + (1|country), SSA)
+summary(mod_1)
+
+ems <- ggeffects::ggemmeans(mod_1, terms = c("year","human_development_groups"))
+
+ggplot2::ggplot(ems, aes(x, predicted, colour = group)) +
+  geom_point() +
+  geom_line(aes(group = group)) +
+  # geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1) + 
+  theme_bw() +
+  ylab("Predicted Gini coefficient") + xlab("Year") +
+  ggtitle("Estimated marginal means of the effect of time on inequality in each Human Development Group - SSA") +
+  scale_colour_discrete(name = "Human Development Group") 
+
+
